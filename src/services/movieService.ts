@@ -1,4 +1,4 @@
-import axios, { type AxiosResponse } from 'axios';
+import axios from 'axios';
 import type { Movie } from '../types/movie';
 
 interface TMDBSearchResponse {
@@ -11,10 +11,10 @@ export async function fetchMovies(query: string): Promise<Movie[]> {
   const token = import.meta.env.VITE_TMDB_TOKEN as string;
 
   if (!token) {
-    throw new Error('VITE_TMDB_TOKEN is missing. Add it to your .env / Vercel env.');
+    throw new Error('VITE_TMDB_TOKEN is missing. Add it to .env / Vercel env.');
   }
 
-  const config = {
+  const response = await axios.get<TMDBSearchResponse>(BASE_URL, {
     params: {
       query,
       include_adult: false,
@@ -24,9 +24,7 @@ export async function fetchMovies(query: string): Promise<Movie[]> {
     headers: {
       Authorization: `Bearer ${token}`,
     },
-  };
+  });
 
-  const res: AxiosResponse<TMDBSearchResponse> = await axios.get(BASE_URL, config);
-
-  return res.data.results;
+  return response.data.results;
 }

@@ -33,7 +33,6 @@ const MovieModal: FC<MovieModalProps> = ({ movie, onClose }) => {
     if (event.target === event.currentTarget) onClose();
   };
 
-  // ВИПРАВЛЕНО: Використовуємо SyntheticEvent замість MouseEvent для onError
   const handleImgError = (event: SyntheticEvent<HTMLImageElement, Event>) => {
     const img = event.currentTarget;
     if (img.src !== FALLBACK_BACKDROP) {
@@ -82,7 +81,6 @@ const MovieModal: FC<MovieModalProps> = ({ movie, onClose }) => {
 
           <p>
             <strong>Rating:</strong>{' '}
-            {/* ВИПРАВЛЕНО: Безпечна перевірка на undefined */}
             {movie.vote_average?.toFixed(1) || 'N/A'}
             /10
           </p>

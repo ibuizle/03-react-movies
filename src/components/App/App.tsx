@@ -1,5 +1,7 @@
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+
+
+import { useState, useEffect } from 'react';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import toast, { Toaster } from 'react-hot-toast';
 import ReactPaginate from 'react-paginate';
 
@@ -9,9 +11,8 @@ import Loader from '../Loader/Loader';
 import ErrorMessage from '../ErrorMessage/ErrorMessage';
 import MovieModal from '../MovieModal/MovieModal';
 
-import { fetchMovies } from '../../services/movieService';
-import type { Movie } from '../../types/movie';
-
+import { fetchMovies } from '../../services/movieService'; 
+import { Movie, MoviesResponse } from '../../types/movie'; 
 import css from './App.module.css';
 
 const App: React.FC = () => {
@@ -19,11 +20,12 @@ const App: React.FC = () => {
   const [page, setPage] = useState<number>(1);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
-  const { data, isLoading, isError } = useQuery({
+ 
+  const { data, isLoading, isError } = useQuery<MoviesResponse>({
     queryKey: ['movies', query, page],
     queryFn: () => fetchMovies(query, page),
     enabled: query.trim() !== '',
-    keepPreviousData: true,
+    placeholderData: keepPreviousData, 
   });
 
   const movies = data?.results ?? [];
@@ -37,9 +39,11 @@ const App: React.FC = () => {
       return;
     }
 
-    setQuery(trimmed);
-    setPage(1);
-    setSelectedMovie(null);
+    if (trimmed !== query) {
+        setQuery(trimmed);
+        setPage(1);
+        setSelectedMovie(null);
+    }
   };
 
   const handleSelectMovie = (movie: Movie) => {
@@ -49,9 +53,15 @@ const App: React.FC = () => {
   const handleCloseModal = () => {
     setSelectedMovie(null);
   };
+  
+  useEffect(() => {
+     if (!isLoading && !isError && movies.length === 0 && query) {
+        toast.error('No movies found for your request.');
+     }
+  }, [isLoading, isError, movies.length, query]);
 
   return (
-    <div>
+    <div className={css.appContainer}>
       <Toaster position="top-right" />
 
       <SearchBar onSubmit={handleSearch} />
@@ -59,10 +69,6 @@ const App: React.FC = () => {
       {isLoading && <Loader />}
 
       {!isLoading && isError && <ErrorMessage />}
-
-      {!isLoading && !isError && movies.length === 0 && query && (
-        toast.error('No movies found for your request.')
-      )}
 
       {!isLoading && !isError && movies.length > 0 && (
         <MovieGrid movies={movies} onSelect={handleSelectMovie} />
@@ -79,6 +85,7 @@ const App: React.FC = () => {
           activeClassName={css.active}
           nextLabel="→"
           previousLabel="←"
+          renderOnZeroPageCount={null}
         />
       )}
 

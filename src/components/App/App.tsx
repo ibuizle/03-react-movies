@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import toast, { Toaster } from 'react-hot-toast';
 import ReactPaginate from 'react-paginate';
 
@@ -9,8 +9,8 @@ import Loader from '../Loader/Loader';
 import ErrorMessage from '../ErrorMessage/ErrorMessage';
 import MovieModal from '../MovieModal/MovieModal';
 
-import { fetchMovies } from '../../services/movieService';
-import type { Movie, MoviesResponse } from '../../types/movie';
+import { fetchMovies, MoviesResponse } from '../../services/movieService';
+import type { Movie } from '../../types/movie';
 
 import css from './App.module.css';
 
@@ -23,7 +23,7 @@ const App: React.FC = () => {
     queryKey: ['movies', query, page],
     queryFn: () => fetchMovies(query, page),
     enabled: query.trim() !== '',
-    placeholderData: keepPreviousData, 
+    keepPreviousData: true,
   });
 
   const movies = data?.results ?? [];
@@ -36,7 +36,7 @@ const App: React.FC = () => {
       toast.error('Please enter a search query.');
       return;
     }
-    
+
     if (trimmed !== query) {
       setQuery(trimmed);
       setPage(1);

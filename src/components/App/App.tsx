@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect } from 'react';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import toast, { Toaster } from 'react-hot-toast';
@@ -11,8 +9,10 @@ import Loader from '../Loader/Loader';
 import ErrorMessage from '../ErrorMessage/ErrorMessage';
 import MovieModal from '../MovieModal/MovieModal';
 
-import { fetchMovies } from '../../services/movieService'; 
-import { Movie, MoviesResponse } from '../../types/movie'; 
+import { fetchMovies } from '../../services/movieService';
+// ВИПРАВЛЕННЯ 1: Використовуємо 'import type' для імпорту інтерфейсів
+import type { Movie, MoviesResponse } from '../../types/movie';
+
 import css from './App.module.css';
 
 const App: React.FC = () => {
@@ -20,11 +20,11 @@ const App: React.FC = () => {
   const [page, setPage] = useState<number>(1);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
- 
   const { data, isLoading, isError } = useQuery<MoviesResponse>({
     queryKey: ['movies', query, page],
     queryFn: () => fetchMovies(query, page),
     enabled: query.trim() !== '',
+    // ВИПРАВЛЕННЯ 2: keepPreviousData для v5 передається ось так
     placeholderData: keepPreviousData, 
   });
 
@@ -38,11 +38,12 @@ const App: React.FC = () => {
       toast.error('Please enter a search query.');
       return;
     }
-
+    
+    // Уникнення повторного пошуку того ж самого запиту
     if (trimmed !== query) {
-        setQuery(trimmed);
-        setPage(1);
-        setSelectedMovie(null);
+      setQuery(trimmed);
+      setPage(1);
+      setSelectedMovie(null);
     }
   };
 
@@ -53,11 +54,12 @@ const App: React.FC = () => {
   const handleCloseModal = () => {
     setSelectedMovie(null);
   };
-  
+
+  // Виправлення логіки toast (щоб не викликати під час рендеру)
   useEffect(() => {
-     if (!isLoading && !isError && movies.length === 0 && query) {
-        toast.error('No movies found for your request.');
-     }
+    if (!isLoading && !isError && movies.length === 0 && query) {
+      toast.error('No movies found for your request.');
+    }
   }, [isLoading, isError, movies.length, query]);
 
   return (

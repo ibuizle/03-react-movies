@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import type { FC, MouseEvent } from 'react';
+import type { FC, MouseEvent, SyntheticEvent } from 'react';
 import { createPortal } from 'react-dom';
 import type { Movie } from '../../types/movie';
 import css from './MovieModal.module.css';
@@ -10,7 +10,6 @@ export interface MovieModalProps {
 }
 
 const IMAGE_BASE = 'https://image.tmdb.org/t/p/original';
-// ✅ більш надійний placeholder, ніж via.placeholder.com
 const FALLBACK_BACKDROP = 'https://placehold.co/1200x675?text=No+Image';
 
 const MovieModal: FC<MovieModalProps> = ({ movie, onClose }) => {
@@ -34,7 +33,8 @@ const MovieModal: FC<MovieModalProps> = ({ movie, onClose }) => {
     if (event.target === event.currentTarget) onClose();
   };
 
-  const handleImgError = (event: MouseEvent<HTMLImageElement>) => {
+  // ВИПРАВЛЕНО: Використовуємо SyntheticEvent замість MouseEvent для onError
+  const handleImgError = (event: SyntheticEvent<HTMLImageElement, Event>) => {
     const img = event.currentTarget;
     if (img.src !== FALLBACK_BACKDROP) {
       img.src = FALLBACK_BACKDROP;
@@ -82,9 +82,8 @@ const MovieModal: FC<MovieModalProps> = ({ movie, onClose }) => {
 
           <p>
             <strong>Rating:</strong>{' '}
-            {Number.isFinite(movie.vote_average)
-              ? movie.vote_average.toFixed(1)
-              : 'N/A'}
+            {/* ВИПРАВЛЕНО: Безпечна перевірка на undefined */}
+            {movie.vote_average?.toFixed(1) || 'N/A'}
             /10
           </p>
         </div>

@@ -26,10 +26,10 @@ const App: React.FC = () => {
     queryKey: ['movies', query, page],
     queryFn: () => fetchMovies(query, page),
     enabled: query.trim() !== '',
-    placeholderData: previousData, // використовуємо попередні дані для безшовної пагінації
+    placeholderData: previousData, 
   });
 
-  // зберігаємо попередні дані при завантаженні нових
+  
   useEffect(() => {
     if (data) setPreviousData(data);
   }, [data]);
@@ -48,7 +48,7 @@ const App: React.FC = () => {
       setQuery(trimmed);
       setPage(1);
       setSelectedMovie(null);
-      setPreviousData(undefined); // очищаємо попередні дані при новому пошуку
+      setPreviousData(undefined);
     }
   };
 
